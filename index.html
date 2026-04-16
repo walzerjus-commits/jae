@@ -740,8 +740,17 @@ const FRASES=[{id:1,cat:"Cumprimentos",nivel:"A1",en:"Hey, what's up?",pt:"Ei, e
 const TASKS=[{t:"Aprenda cumprimentos e despedidas informais",tip:"Hey, what's up, see ya — o americano raramente diz goodbye",done:false},{t:"Memorize as frases de nível A1 desta lista",tip:"10 frases por dia, repita em voz alta imitando o sotaque",done:false},{t:"Entenda contrações: wanna, gonna, gotta",tip:"Americanos quase nunca falam 'I am going to' — dizem 'I'm gonna'",done:false},{t:"Assista 10 min/dia de vídeos americanos com legenda",tip:"YouTube: English with Lucy ou TikToks com closed captions",done:false},{t:"Pratique small talk: clima, fim de semana, trabalho",tip:"'How's it going?' é a pergunta mais comum dos EUA",done:false}];
 const ROUTINE=[{n:"1",title:"Revisão de ontem",dur:"5 min",desc:"Releia 5 frases que aprendeu ontem. Fale em voz alta."},{n:"2",title:"Aprenda frases novas",dur:"7 min",desc:"Escolha 5 frases novas e toque para marcar como aprendida."},{n:"3",title:"Input em inglês",dur:"6 min",desc:"Assista um clipe curto prestando atenção nas frases."},{n:"4",title:"Fale em voz alta",dur:"2 min",desc:"Crie 2–3 frases suas. Grave no celular se possível."}];
 let STATE={user:{nome:"Usuário",iniciais:"AU",email:""},tasks:TASKS.map(t=>({...t})),phrases:FRASES.map(p=>({...p,learned:false})),rotinaStarted:false,stepsDone:0,activeCat:"Todos",activeNivel:"Todos",streak:1};
-function save(){try{localStorage.setItem("au_v3",JSON.stringify(STATE));}catch(e){}}
-function load(){try{const s=localStorage.getItem("au_v3");if(s){const d=JSON.parse(s);STATE={...STATE,...d,phrases:d.phrases||STATE.phrases,tasks:d.tasks||STATE.tasks};}}catch(e){}}
+function save(){try{localStorage.setItem("au_v4",JSON.stringify(STATE));}catch(e){}}
+function load(){try{
+  const s=localStorage.getItem("au_v4");
+  if(s){
+    const d=JSON.parse(s);
+    const savedIds=(d.phrases||[]).map(function(p){return p.id;});
+    const novas=STATE.phrases.filter(function(p){return !savedIds.includes(p.id);});
+    const merged=(d.phrases||[]).map(function(p){return Object.assign({},p);}).concat(novas);
+    STATE=Object.assign({},STATE,d,{phrases:merged,tasks:d.tasks||STATE.tasks});
+  }
+}catch(e){}}
 function irParaApp(){document.getElementById("landing").style.display="none";document.getElementById("login-screen").style.display="flex";document.getElementById("login-screen").style.flexDirection="column";}
 function voltarLanding(){document.getElementById("app-shell").style.display="none";document.getElementById("landing").style.display="block";window.scrollTo(0,0);}
 function doLogin(){const e=document.getElementById("inp-email").value,s=document.getElementById("inp-senha").value;if(!e||!s){alert("Preencha e-mail e senha.");return;}const n=e.split("@")[0];STATE.user={nome:n,iniciais:n.substring(0,2).toUpperCase(),email:e};showApp();}
@@ -1015,66 +1024,65 @@ if(STATE.user&&STATE.user.email&&STATE._autoLogin){document.getElementById("land
 
 
 function renderDicio() {
-  const el = document.getElementById('dicio-pro-check');
+  var el = document.getElementById('dicio-pro-check');
   if (!el) return;
-  
-  // Verificar se é Pro (por enquanto todos têm acesso para teste)
-  const isPro = true; // TODO: vincular ao plano real
-  
+  var isPro = true;
   if (!isPro) {
-    el.innerHTML = `
-      <div class="pro-lock">
-        <div class="pro-lock-icon">🔒</div>
-        <div class="pro-lock-title">Recurso exclusivo Pro</div>
-        <div class="pro-lock-sub">O Dicionário Bilíngue com mais de 150 termos em 3 categorias é exclusivo para assinantes Pro.</div>
-        <button class="abtn abtn-navy" onclick="goTo('perfil')">Ver planos Pro</button>
-      </div>`;
+    el.innerHTML = '<div class="pro-lock"><div class="pro-lock-icon">🔒</div><div class="pro-lock-title">Recurso exclusivo Pro</div><div class="pro-lock-sub">O Dicionário Bilíngue é exclusivo para assinantes Pro.</div><button class="abtn abtn-navy" onclick="goTo(\'perfil\')">Ver planos Pro</button></div>';
     return;
   }
-  
-  const q = (document.getElementById('dicio-inp') || {}).value || '';
-  const dir = window._dicioDir || 'en-pt';
-  const sub = window._dicioSub || 'Todos';
-  
-  let filtered = DICIONARIO.filter(d => {
-    const matchSub = sub === 'Todos' || d.sub === sub || d.cat === sub;
+  var inp = document.getElementById('dicio-inp');
+  var q = inp ? inp.value : '';
+  var dir = window._dicioDir || 'en-pt';
+  var sub = window._dicioSub || 'Todos';
+  var subs = ['Todos','TI','Policial','Jurídico','Geral','Formal','Geografia'];
+  var tagClass = {TI:'tag-ti',Policial:'tag-policial','Jurídico':'tag-juridico',Geral:'tag-coloquial',Formal:'tag-culto',Geografia:'tag-ti'};
+  var filtered = DICIONARIO.filter(function(d) {
+    var matchSub = sub === 'Todos' || d.sub === sub || d.cat === sub;
     if (!q) return matchSub;
-    if (dir === 'en-pt') return matchSub && d.en.toLowerCase().includes(q.toLowerCase());
-    return matchSub && d.pt.toLowerCase().includes(q.toLowerCase());
+    if (dir === 'en-pt') return matchSub && d.en.toLowerCase().indexOf(q.toLowerCase()) >= 0;
+    return matchSub && d.pt.toLowerCase().indexOf(q.toLowerCase()) >= 0;
   });
-  
-  const subs = ['Todos', 'TI', 'Policial', 'Jurídico', 'Geral', 'Formal'];
-  const tagClass = {TI:'tag-ti', Policial:'tag-policial', Jurídico:'tag-juridico', Geral:'tag-coloquial', Formal:'tag-culto'};
-  
-  el.innerHTML = `
-    <div class="dicio-hero">
-      <div class="dicio-hero-title">📖 Dicionário Bilíngue</div>
-      <div class="dicio-hero-sub">${DICIONARIO.length} termos · Técnico, Coloquial e Culto</div>
-    </div>
-    <div class="dicio-controls">
-      <input class="dicio-search" id="dicio-inp" type="text" placeholder="${dir==='en-pt'?'Buscar em inglês...':'Buscar em português...'}" value="${q}" oninput="renderDicio()">
-      <button class="dir-btn ${dir==='en-pt'?'active':''}" onclick="window._dicioDir='en-pt';renderDicio()">EN→PT</button>
-      <button class="dir-btn ${dir==='pt-en'?'active':''}" onclick="window._dicioDir='pt-en';renderDicio()">PT→EN</button>
-    </div>
-    <div class="sub-row">${subs.map(s=>`<span class="sub-chip${s===sub?' active':''}" onclick="window._dicioSub='${s}';renderDicio()">${s}</span>`).join('')}</div>
-    <div class="dicio-count">${filtered.length} termos encontrados</div>
-    <div id="dicio-list">${filtered.map(d => {
-      const word = dir==='en-pt' ? d.en : d.pt;
-      const trans = dir==='en-pt' ? d.pt : d.en;
-      const tc = tagClass[d.sub] || 'tag-ti';
-      return `<div class="dicio-card">
-        <div class="dicio-main">
-          <div class="dicio-word">${word}</div>
-          <div class="dicio-trans">${trans}</div>
-          ${dir==='en-pt' ? `<div class="dicio-pr">${d.pr}</div>` : ''}
-          <div class="dicio-tags"><span class="dicio-tag ${tc}">${d.sub}</span></div>
-        </div>
-        <button class="dicio-audio" onclick="falarFrase(this,'${d.en.replace(/'/g,"\'")}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>
-        </button>
-      </div>`;
-    }).join('')}</div>`;
+  var html = '';
+  html += '<div class="dicio-hero">';
+  html += '<div class="dicio-hero-title">📖 Dicionário Bilíngue</div>';
+  html += '<div class="dicio-hero-sub">' + DICIONARIO.length + ' termos · Técnico, Coloquial e Culto</div>';
+  html += '</div>';
+  html += '<div class="dicio-controls">';
+  html += '<input class="dicio-search" id="dicio-inp" type="text" placeholder="' + (dir==='en-pt'?'Buscar em inglês...':'Buscar em português...') + '" value="' + q + '" oninput="renderDicio()">';
+  html += '<button class="dir-btn ' + (dir==='en-pt'?'active':'') + '" onclick="window._dicioDir=\'en-pt\';renderDicio()">EN→PT</button>';
+  html += '<button class="dir-btn ' + (dir==='pt-en'?'active':'') + '" onclick="window._dicioDir=\'pt-en\';renderDicio()">PT→EN</button>';
+  html += '</div>';
+  html += '<div class="sub-row">';
+  for (var i=0; i<subs.length; i++) {
+    var s = subs[i];
+    html += '<span class="sub-chip' + (s===sub?' active':'') + '" onclick="window._dicioSub=\'' + s + '\';renderDicio()">' + s + '</span>';
+  }
+  html += '</div>';
+  html += '<div class="dicio-count">' + filtered.length + ' termos encontrados</div>';
+  html += '<div id="dicio-list">';
+  for (var j=0; j<filtered.length; j++) {
+    var d = filtered[j];
+    var word = dir==='en-pt' ? d.en : d.pt;
+    var trans = dir==='en-pt' ? d.pt : d.en;
+    var tc = tagClass[d.sub] || 'tag-ti';
+    var enSafe = d.en.replace(/'/g, "\'");
+    html += '<div class="dicio-card">';
+    html += '<div class="dicio-main">';
+    html += '<div class="dicio-word">' + word + '</div>';
+    html += '<div class="dicio-trans">' + trans + '</div>';
+    if (dir==='en-pt') { html += '<div class="dicio-pr">' + d.pr + '</div>'; }
+    html += '<div class="dicio-tags"><span class="dicio-tag ' + tc + '">' + d.sub + '</span></div>';
+    html += '</div>';
+    html += '<button class="dicio-audio" onclick="falarFrase(this,\'' + enSafe + '\')">';
+    html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg>';
+    html += '</button>';
+    html += '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
 }
+
 function falarFrase(btn, texto) {
   if (!window.speechSynthesis) { alert('Seu navegador não suporta áudio.'); return; }
   window.speechSynthesis.cancel();
