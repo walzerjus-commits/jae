@@ -643,16 +643,7 @@ window.speechSynthesis.onvoiceschanged = () => {};
     </div>
   </div>
 
-  <div class="screen" id="screen-dicionario">
-    <div class="content">
-      <div class="a-title">Dicionário</div>
-      <div class="a-subtitle">Busca bidirecional EN↔PT — técnico, coloquial e culto.</div>
-      <input class="search-inp" type="text" id="dic-search" placeholder="Digite em inglês ou português..." oninput="renderDic()" style="margin-bottom:10px;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="dic-cats"></div>
-      <div class="phrase-count" id="dic-count"></div>
-      <div id="dic-list"></div>
-    </div>
-  </div>
+  
   <div class="screen" id="screen-perfil">
     <div class="content">
       <div class="profile-hero">
@@ -690,7 +681,7 @@ window.speechSynthesis.onvoiceschanged = () => {};
     <button class="nav-btn" id="nav-fases" onclick="goTo('fases')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>Fases</span></button>
     <button class="nav-btn" id="nav-frases" onclick="goTo('frases')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Frases</span></button>
     <button class="nav-btn" id="nav-rotina" onclick="goTo('rotina')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Rotina</span></button>
-    <button class="nav-btn" id="nav-dicionario" onclick="goTo('dicionario')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Dicionário</span></button>
+    
     <button class="nav-btn" id="nav-dicio" onclick="goTo('dicio')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Dicionário</span></button>
     <button class="nav-btn" id="nav-perfil" onclick="goTo('perfil')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Perfil</span></button>
   </nav>
